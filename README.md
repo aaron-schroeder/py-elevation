@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents                                                                    
+## Table of Contents           
 - [Table of Contents](#table-of-contents)
 - [Background](#background)
 - [Introduction](#introduction)
@@ -75,9 +75,6 @@ The paper is included in the [`resources` folder]()
 
 ## Dependencies and Installation
 
-<!-- This applies to py-distance: 
-[GeoPy](https://github.com/geopy/geopy), -->
-
 [Pandas](http://pandas.pydata.org/) and [SciPy](https://www.scipy.org/) are required.
 
 To install (since I am not on pypi yet), first clone this repo.
@@ -106,27 +103,29 @@ import pandas as pd
 
 import elevation
 
-# Generate some distance coordinates.
+# Generate some distance coordinates that would result from moving
+# at a variable speed.
 num_samples = 600
-distance_series = pd.Series([3.0 * i for i in range(num_samples)]) 
+distance_series = pd.Series(
+  [2.0 * i + math.cos(0.01 * i) for i in range(num_samples)]
+)
 
-# Generate some noisy elevation coordinates
+# Generate some noisy elevation coordinates with a lower-frequency
+# (genuine) signal.
 noise_mean = 0.0
 std = 0.5
 noise = np.random.normal(noise_mean, std, size=num_samples)
-signal = pd.Series([1600.0 + 100.0 * math.sin(0.01 * i) for i in range(num_samples)])
-
+signal = pd.Series(
+  [1600.0 + 100.0 * math.sin(0.01 * i) for i in range(num_samples)]
+)
 elevation_series = signal + noise
 
-# Compare the elevation gain using the different elevation sources.
-print(sf.elevation_gain(google_elevs))
-print(sf.elevation_gain(img_elevs))
-
-# Use the algorithm to smooth the elevation profiles, and calculate
-# reasonable grades between points.
-grade_google = sf.grade_smooth(distances, google_elevs)
-grade_img = sf.grade_smooth(distances, img_elevs)
+# Smooth with either algorithm
+elev_dist_smooth = elevation.dist_smooth(distance_series, elevation_series)
+elev_time_smooth = elevation.time_smooth(elevation_series)
 ```
+<!-- # Calculate elevation gain and loss on any of the series, using your
+# choice of algorithm. -->
 
 ---
 
@@ -135,13 +134,13 @@ grade_img = sf.grade_smooth(distances, img_elevs)
 ### Complete
 
 - Implement an algorithm to smooth noisy elevation time series.
+- Implement a smoothing algorithm for elevation series as a function of
+  distance (similar to how the completed time-smoother works.)
 
 ### Current Activities
 
-- Implement a smoothing algorithm for elevation series as a function of
-  distance (similar to how the completed time-smoother works.)
-- Make the elevation gain algorithm smarter, or create an alternate
-  algorithm to emulate algorithms employed by Strava/TrainingPeaks/Garmin.
+- Develop and document a variety of elevation gain/loss algorithms. 
+  
 - Describe the algorithms in more detail. Maybe in a wiki?
 - Provide references to papers and other resources where I got inspiration
   for each algorithm.
@@ -154,6 +153,8 @@ grade_img = sf.grade_smooth(distances, img_elevs)
    - Generate series of GPS points to obtain elevation coordinates from
      various DEMs (using upcoming `elevation-query` package) to compare elevation
      datasets with and without smoothing.
+- Create gain/loss algorithms to emulate those employed by 
+  Strava / TrainingPeaks / Garmin.
 
 ---
 

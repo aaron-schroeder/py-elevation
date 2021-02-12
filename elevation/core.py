@@ -7,12 +7,19 @@ from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 
 
-def threshold_filter(elevation_series):
-  """Filter elevation series by breaking it into 5m vert increments."""
+def threshold_filter(elevation_series, threshold=5.0):
+  """Filter elevation series by breaking it into vertical increments.
+  
+  Args:
+    elevation_series (pd.Series): elevation coordinates along a path.
+    threshold (float): Threshold beyond which a change in elevation is
+      registered by the algorithm, in the units of the elevation series.
+      Default 5.0.
+  """
   ref_elev = elevation_series.iloc[0]
   elev_array = []
   for i, elev in elevation_series.iteritems():
-    if abs(elev - ref_elev) > 5:
+    if abs(elev - ref_elev) > threshold:
       ref_elev = elev
     elev_array.append(ref_elev) 
 
@@ -22,7 +29,15 @@ def threshold_filter(elevation_series):
 
 
 def flatten_series(elevation_series):
-  """Return a pd.Series with no change in elevation."""
+  """Return a pd.Series with no change in elevation.
+  
+  Args:
+    elevation_series (pd.Series): elevation coordinates along a path.
+  
+  Returns:
+    pd.Series: flat elevation coordinates located at the mean value
+      of the input coordinates. 
+  """
   elevation_series.iloc[:] = elevation_series.mean()
 
   return elevation_series
@@ -51,7 +66,7 @@ def time_smooth(elevation_series, sample_len=1, window_len=21, polyorder=2):
   trail hike.
 
   Args:
-    elevations (pandas.Series): elevations above sea level corresponding
+    elevations (pd.Series): elevations above sea level corresponding
       to the time of each sample (assumed 1-second interval).
     sample_len (int): time (in seconds) between between desired 
       resampled data. Default is 1.
@@ -61,7 +76,7 @@ def time_smooth(elevation_series, sample_len=1, window_len=21, polyorder=2):
       Must be less than `window_len`.
 
   Returns:
-    pandas.Series: elevation series that results from this smoothing 
+    pd.Series: elevation coordinates that result from this smoothing
       algorithm.
 
   TODO: 
@@ -95,9 +110,9 @@ def distance_smooth(distance_series, elevation_series, sample_len=5.0,
   WIP!!!
 
   Args:
-    distances (pandas.Series): cumulative distances along a path.
-    elevations (pandas.Series): elevations above sea level corresponding
-      to the same path.
+    distance_series (pd.Series): cumulative distances along a path.
+    elevation_series (pd.Series): elevations above sea level 
+      corresponding to the same path.
     sample_len (float): distance between between desired resampled data.
     window_len (int): length of the window used in the SG filter.
       Must be positive odd integer.
@@ -105,7 +120,7 @@ def distance_smooth(distance_series, elevation_series, sample_len=5.0,
       Must be less than `window_len`.
 
   Returns:
-    pandas.Series: elevation series that results from this smoothing 
+    pd.Series: elevation coordinates that result from this smoothing 
       algorithm.
   """
 
@@ -155,11 +170,17 @@ def distance_smooth(distance_series, elevation_series, sample_len=5.0,
 
 
 def gain_naive(elevation_series):
-  """Calculate elevation gain (scalar) from a series.
+  """Calculate elevation gain (scalar).
 
-  TODO: Make sure mtd registration can handle funcs w scalar output
+  This is the most generous elevation gain algorithm there is; it
+  counts every little rise in the trail towards your total.
+
+  Args:
+    elevation_series (pd.Series): elevation coordinates to which this
+      algorithm will be applied.
+  Returns:
+    float: total elevation gain along the path.
   """
-  #print(elevation)
   diffs = elevation_series.diff(1)
   diffs[diffs < 0] = 0.0
 
@@ -167,11 +188,35 @@ def gain_naive(elevation_series):
 
 
 def loss_naive(elevation_series):
-  """Calculate elevation loss (scalar) from a pd.Series.
+  """Calculate elevation loss (scalar).
 
-  TODO: Not DRY. Repurpose the gain function.
+  Args:
+    elevation_series (pd.Series): elevation coordinates to which this
+      algorithm will be applied.
+  Returns:
+    float: total elevation loss along the path.
   """
-  diffs = elevation_series.diff(1)
-  diffs[diffs > 0] = 0.0
+  # diffs = elevation_series.diff(1)
+  # diffs[diffs > 0] = 0.0
 
-  return -diffs.sum()
+  # return -diffs.sum()
+
+  return -gain_naive(-1.0 * elevation_series)
+
+
+def gain_threshold(elevation_series, threshold=5.0):
+  """Conservatively calculate elevation gain (scalar).
+
+  This algorithm doesn't count elevation gain until the elevation
+  coordinates rise by at least a threshold value from their prior
+  reference location. 
+
+  Args:
+    elevation_series (pd.Series): elevation coordinates to which this
+      algorithm will be applied.
+    threshold: the value by which an elevation coordinate must exceed
+      the prior elevation coordinate in order to count toward the total.
+      Same units as those of the elevation series. Default 5.0.
+  Returns:
+    float: total elevation gain along the path.
+  """

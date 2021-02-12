@@ -33,7 +33,7 @@ def get_version(rel_path):
   raise RuntimeError('Unable to find version string.')
 
 
-with open('README.rst') as f:
+with open('README.md') as f:
   readme = f.read()
 
 with open('LICENSE') as f:
@@ -42,8 +42,9 @@ with open('LICENSE') as f:
 setup(
   name=pkg_name,
   version=get_version('%s/__init__.py' % pkg_name),
-  description='description placeholder',
+  description='Python library for working with elevation and grade time series',
   long_description=readme,
+  long_description_content_type='text/markdown',
   author='Aaron Schroeder',
   # author_email='',
   install_requires = [
@@ -52,28 +53,9 @@ setup(
   ],
   url='https://github.com/aaron-schroeder/py-elevation',
   license=license,
-  packages=find_packages(exclude=('tests', 'docs'))
+  packages=find_packages(exclude=('tests', 'docs')),
+    classifiers=[
+    #'Programming Language :: Python :: 3.6',
+    'License :: OSI Approved :: MIT License',
+  ],
 )
-
-# Old Spatialfriend stuff
-# requirements = ['geopy>=1.20.0', 'googlemaps>=3.0', 'numpy>=1.14',
-#                 'pandas>=0.24', 'scipy>=1.1']
-
-# setup(name='spatialfriend',
-#       version='0.0.11',
-#       author='Aaron Schroeder',
-#       author_email='aaron@trailzealot.com',
-#       description='Python library for calculating geospatial data'  \
-#                 + ' from gps coordinates.',
-#       long_description=readme,
-#       long_description_content_type='text/markdown',
-#       url='https://github.com/aaron-schroeder/spatialfriend',
-#       packages=['spatialfriend'],
-#       install_requires=requirements,
-#       extras_require={
-#         'img': ['GDAL>=2.1.3', 'utm>=0.4.2'],
-#         'tnm': ['requests>=2.22', 'urllib3>=1.25.6'],
-#       },
-#       license='MIT License',
-#       classifiers=['Programming Language :: Python :: 3.6',
-#                    'License :: OSI Approved :: MIT License',],)

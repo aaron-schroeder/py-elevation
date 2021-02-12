@@ -1,3 +1,2 @@
-#numpy
 pandas
-scipy  # this definitely has a version req
+scipy
