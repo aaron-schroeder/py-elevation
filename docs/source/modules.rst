@@ -1,7 +1,7 @@
-distance
-========
+elevation
+=========
 
 .. toctree::
    :maxdepth: 4
 
-   distance
+   elevation

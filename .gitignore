@@ -2,6 +2,10 @@
 .vscode/
 .DS_STORE
 
+# WIP
+old_smoothing_files/
+smoothing_example.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

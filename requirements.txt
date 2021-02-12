@@ -1,5 +1,3 @@
-#nose
-#sphinx
-# geopy  # by default though?
-numpy
+#numpy
 pandas
+scipy  # this definitely has a version req

@@ -1,38 +1,40 @@
 # -*- coding: utf-8 -*-
 
-import distance
-
 import unittest
 
-import pandas as pd
-import numpy as np
+import elevation
 
-#import heartandsole.algorithms as algs
+import pandas as pd
 
 
 class TestAlgorithms(unittest.TestCase):
 
-  def test_displacement(self):
-    """Test out my distance algorithm with hand calcs.
+  def test_time_smooth(self):
+    """Just see if the thing works.
 
-    TODO: Figure out how to just test the distance algorithm, without
-          summoning a real series. OR, I could just break unittest
-          guidelines and leave the test as-is. I was originally thinking
-          of having a whole box of algorithms that I test. And that may
-          happen one day. But for now, let us make it easy.
+    (indirectly) demonstrate usage of the elevation smoothing method,
+    which is finicky about the interactions of parameters and array
+    lengths.
     """
-    lon = pd.Series([0.0, 0.0, 0.0])
-    lon_ew = pd.Series([0.0, 1.0, 2.0])
-    lat = pd.Series([0.0, 0.0, 0.0])
-    lat_ns = pd.Series([0.0, 1.0, 2.0])
+    elevation_series = pd.Series([1.0 * i for i in range(60)])
 
-    disp_ew = distance.spherical_earth_plane_displacement(lat, lon_ew)
-    self.assertIsInstance(disp_ew, pd.Series)
-    self.assertAlmostEqual(disp_ew.iloc[-1], 6371000 * 1.0 * np.pi / 180)
+    self.assertIsInstance(
+      elevation.time_smooth(elevation_series),  # window_len=3),
+      pd.Series)
 
-    disp_ns = distance.spherical_earth_plane_displacement(lat_ns, lon)
-    self.assertIsInstance(disp_ns, pd.Series)
-    self.assertAlmostEqual(disp_ns.iloc[-1], 6371000 * 1.0 * np.pi / 180)
+  def test_distance_smooth(self):
+    """Just see if the thing works.
+    
+    Demonstrate usage of the elevation smoothing method, which
+    is finicky about the interactions of parameters and array
+    lengths.
+    """
+    distance_series = pd.Series([3.0 * i for i in range(1000)])
+    elevation_series = pd.Series([1.0 * i for i in range(1000)])
+
+    self.assertIsInstance(
+      elevation.distance_smooth(distance_series, elevation_series),
+      pd.Series)
 
 
 if __name__ == '__main__':
